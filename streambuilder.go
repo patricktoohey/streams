@@ -11,7 +11,6 @@ func BuildStream(server string, streamName string, subjects string, subscriberGr
 	if nerr != nil {
 		log.Fatal(nerr)
 	}
-	defer nc.Close()
 
 	js, err := nc.JetStream()
 	if err != nil {
