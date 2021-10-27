@@ -6,7 +6,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func BuildStream(server string, streamName string, subjects string, subscriberGroup string) *nats.Subscription {
+func BuildStream(server string, streamName string, subjects string, subscriberGroup string) (*nats.Conn, *nats.Subscription) {
 	nc, nerr := nats.Connect(server)
 	if nerr != nil {
 		log.Fatal(nerr)
@@ -41,5 +41,5 @@ func BuildStream(server string, streamName string, subjects string, subscriberGr
 	if errsub != nil {
 		log.Fatal(errsub)
 	}
-	return sub
+	return nc, sub
 }
