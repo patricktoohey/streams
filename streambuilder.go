@@ -6,7 +6,21 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func BuildStream(server string, streamName string, subjects string, subscriberGroup string) (*nats.Conn, *nats.Subscription) {
+func BuildPullSubscriber(js nats.JetStreamContext, subjects string, subscriberGroup string, inflight int) *nats.Subscription {
+
+	// Create Pull based consumer with maximum N inflight.
+	// PullMaxWaiting defines the max inflight pull requests.
+	log.Println("Opening subscription...")
+	sub, errsub := js.PullSubscribe(subjects, subscriberGroup, nats.PullMaxWaiting(inflight))
+
+	if errsub != nil {
+		log.Fatal(errsub)
+	}
+	return sub
+}
+
+func BuildStream(server string, streamName string, subjects string) (*nats.Conn, nats.JetStreamContext) {
+
 	nc, nerr := nats.Connect(server)
 	if nerr != nil {
 		log.Fatal(nerr)
@@ -32,13 +46,5 @@ func BuildStream(server string, streamName string, subjects string, subscriberGr
 		}
 	}
 
-	// Create Pull based consumer with maximum 128 inflight.
-	// PullMaxWaiting defines the max inflight pull requests.
-	log.Println("Opening subscription...")
-	sub, errsub := js.PullSubscribe(subjects, subscriberGroup, nats.PullMaxWaiting(128))
-
-	if errsub != nil {
-		log.Fatal(errsub)
-	}
-	return nc, sub
+	return nc, js
 }
